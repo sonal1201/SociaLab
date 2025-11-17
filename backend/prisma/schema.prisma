@@ -5,7 +5,7 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-  provider = "prisma-client"
+  provider = "prisma-client-js"
 }
 
 datasource db {
@@ -14,11 +14,18 @@ datasource db {
 }
 
 model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  createdAt DateTime @default(now())
+  updateAt  DateTime @updatedAt
+}
+
+model onBoardUser {
   id              String  @id @default(uuid())
   fullname        String
   username        String  @unique
-  email           String  @unique
-  password        String
+  bio             String?
   profileImageUrl String?
 
   createdAt DateTime @default(now())
