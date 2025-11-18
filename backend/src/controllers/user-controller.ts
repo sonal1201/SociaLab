@@ -138,3 +138,34 @@ export const loginUser = async (req: Request, res: Response) => {
         res.status(500).json({ error: 'Internal server error' });
     }
 }
+
+export interface AuthRequest extends Request {
+    userId?: string;
+}
+
+
+export const logoutUser = async (req: AuthRequest, res: Response) => {
+    try {
+        const userId = req.userId
+        await prisma.session.deleteMany({
+            where: {
+                userId
+            }
+        })
+
+        await prisma.user.update({
+            where: {
+                id: userId
+            },
+            data: { isLoggedIn: false }
+        })
+
+        return res.status(200).json({
+            success: true,
+            message: "Logout successfully"
+        })
+    } catch (error) {
+        console.error('Logout error:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+}
