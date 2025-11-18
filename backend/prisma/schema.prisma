@@ -14,11 +14,20 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(uuid())
-  email     String   @unique
-  password  String
-  createdAt DateTime @default(now())
-  updateAt  DateTime @updatedAt
+  id         String    @id @default(uuid())
+  email      String    @unique
+  password   String
+  isLoggedIn Boolean   @default(false)
+  token      String?
+  createdAt  DateTime  @default(now())
+  updateAt   DateTime  @updatedAt
+  session    Session[]
+}
+
+model Session {
+  id     String @id @default(uuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
 }
 
 model onBoardUser {
