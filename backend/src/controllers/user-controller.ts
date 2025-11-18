@@ -82,7 +82,7 @@ export const loginUser = async (req: Request, res: Response) => {
         const passwordCompare = await bcrypt.compare(password, user.password);
 
         if (!passwordCompare) {
-            res.status(401).json({
+            return res.status(401).json({
                 error: "Incorrect Password"
             })
         }
