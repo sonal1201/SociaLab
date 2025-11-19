@@ -5,7 +5,6 @@ import React from "react";
 
 const Logout = () => {
   const { user, setUser } = getUserData();
-  console.log(user);
   const accessToken = localStorage.getItem("accessToken");
 
   const logoutHandler = async () => {

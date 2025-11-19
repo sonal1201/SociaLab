@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { prisma } from "../config/db";
-import { AuthRequest } from "./user-controller";
+import { AuthRequest } from "../middleware/auth-middleware";
+
 
 
 export const onBoardingUser = async (req: AuthRequest, res: Response) => {

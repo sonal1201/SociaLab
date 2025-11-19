@@ -6,12 +6,11 @@ import React from "react";
 
 const Feed = () => {
   const { user, setUser } = getUserData();
-  console.log(user);
-  const accessToken = localStorage.getItem("accessToken");
+  console.log(user)
 
   return (
     <div>
-      <h1>Feed Page {user.email}</h1>
+      <h1>Welcome @{user?.profile?.fullname}</h1>
       <Logout />
     </div>
   );

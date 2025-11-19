@@ -3,6 +3,7 @@ import { prisma } from "../config/db";
 import bcrypt from 'bcrypt';
 import jwt from "jsonwebtoken"
 import { success } from "zod";
+import { AuthRequest } from "../middleware/auth-middleware";
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key'
 
@@ -93,7 +94,7 @@ export const loginUser = async (req: Request, res: Response) => {
             where: {
                 userId: user.id
             }
-            
+
         })
 
         if (existSession) {
@@ -142,8 +143,39 @@ export const loginUser = async (req: Request, res: Response) => {
     }
 }
 
-export interface AuthRequest extends Request {
-    userId?: string;
+
+export const currentUser = async (req: AuthRequest, res: Response) => {
+    try {
+        const userId = req.userId;
+
+        if (!userId) {
+            return res.status(401).json({ success: false, error: "Unauthorized" });
+        }
+
+        const user = await prisma.user.findUnique({
+            where: {
+                id: userId
+            },
+            include: {
+                profile: true
+            }
+        })
+
+        if (!user) {
+            return res.status(404).json({ success: false, error: "User not found" });
+        }
+
+        return res.status(200).json({
+            success: true,
+            user,
+        });
+
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            error: "Internal server error",
+        });
+    }
 }
 
 
