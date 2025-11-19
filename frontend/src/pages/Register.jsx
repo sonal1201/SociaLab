@@ -141,7 +141,7 @@ const Register = () => {
             <CardFooter className="flex-col gap-2">
               <Button
                 type="submit"
-                className="w-full hover:bg-[#43634d] bg-[#36572c] cursor-pointer"
+                className="w-full mt-4 hover:bg-[#43634d] bg-[#36572c] cursor-pointer"
                 disabled={loading}
                 onClick={handleSubmit}
               >

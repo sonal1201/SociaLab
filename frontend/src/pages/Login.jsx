@@ -16,9 +16,11 @@ import { Eye, EyeClosed, EyeOff, Loader } from "lucide-react";
 import axios from "axios";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
+import { getUserData } from "@/context/userContext";
 
 const Login = () => {
   const navigate = useNavigate();
+  const { setUser } = getUserData();
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
@@ -50,11 +52,17 @@ const Login = () => {
       );
 
       if (res.data.success) {
-        // try {
-        //   localStorage.setItem("accessToken", res.data.accessToken);
-        // } catch (e) {
-        //   console.warn("Could not save access token to localStorage", e);
-        // }
+        try {
+          localStorage.setItem("accessToken", res.data.accessToken);
+          localStorage.setItem("user", JSON.stringify(res.data.updateUser));
+        } catch (e) {
+          console.warn(
+            "Could not save access token or user to localStorage",
+            e
+          );
+        }
+        setUser(res.data.updateUser);
+
         navigate("/feed");
         toast.success(res.data.message || "Logged in");
       } else {
@@ -147,7 +155,7 @@ const Login = () => {
               <CardFooter className="flex-col gap-2">
                 <Button
                   type="submit"
-                  className="w-full hover:bg-[#43634d] bg-[#36572c] cursor-pointer"
+                  className="w-full mt-8 hover:bg-[#43634d] bg-[#36572c] cursor-pointer"
                   disabled={loading}
                 >
                   {loading ? (
@@ -158,6 +166,15 @@ const Login = () => {
                     "Login"
                   )}
                 </Button>
+                <p className="text-center text-sm text-[#36572c]">
+                  Don't have an account?
+                  <span
+                    className="underline cursor-pointer text-[#1f3d16]"
+                    onClick={() => navigate("/register")}
+                  >
+                    Sign up
+                  </span>
+                </p>
               </CardFooter>
             </form>
           </Card>
