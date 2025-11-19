@@ -93,6 +93,7 @@ export const loginUser = async (req: Request, res: Response) => {
             where: {
                 userId: user.id
             }
+            
         })
 
         if (existSession) {

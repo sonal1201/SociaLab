@@ -56,12 +56,12 @@ const Register = () => {
         toast.error(res.data.error || res.data.message);
       }
     } catch (error) {
-       const message =
-      error.response?.data?.error ||
-      error.response?.data?.message ||
-      "Something went wrong";
+      const message =
+        error.response?.data?.error ||
+        error.response?.data?.message ||
+        "Something went wrong";
 
-    toast.error(message);
+      toast.error(message);
     } finally {
       setLoading(false);
     }

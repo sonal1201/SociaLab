@@ -18,14 +18,15 @@ import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { getUserData } from "@/context/userContext";
 
-const Login = () => {
+const OnBoarding = () => {
   const navigate = useNavigate();
   const { setUser } = getUserData();
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
-    email: "",
-    password: "",
+    username: "",
+    fullname: "",
+    bio: "",
   });
 
   const handleChange = (e) => {
@@ -42,34 +43,19 @@ const Login = () => {
     try {
       setLoading(true);
       const res = await axios.post(
-        "http://localhost:3001/api/v1/user/login",
+        "http://localhost:3001/api/v1/onBoard/",
         formData,
         {
           headers: {
             "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
           },
         }
       );
 
       if (res.data.success) {
-        try {
-          localStorage.setItem("accessToken", res.data.accessToken);
-          localStorage.setItem("user", JSON.stringify(res.data.updateUser));
-        } catch (e) {
-          console.warn(
-            "Could not save access token or user to localStorage",
-            e
-          );
-        }
-        setUser(res.data.updateUser);
-
-        if (!res.data.updateUser.profileId) {
-          navigate("/onboarding");
-        } else {
-          navigate("/feed");
-        }
-
-        toast.success(res.data.message || "Logged in");
+        navigate("/feed");
+        toast.success(res.data.message);
       } else {
         toast.error(res.data.message || res.data.error || "Login failed");
       }
@@ -101,66 +87,67 @@ const Login = () => {
           <Card className="w-full max-w-sm mt-2">
             <CardHeader>
               <CardTitle className={"text-[#36572c] text-center"}>
-                Login With Your Account
+                Complete Your Profile
               </CardTitle>
-              <CardDescription>
-                Enter your email below to login to your account
+              <CardDescription className={"text-center"}>
+                Set up your username and basic details
               </CardDescription>
             </CardHeader>
             <form onSubmit={handleSubmit}>
               <CardContent>
                 <div className="flex flex-col gap-6">
                   <div className="grid gap-2">
-                    <Label className={"text-[#36572c]"} htmlFor="email">
-                      Email
+                    <Label className={"text-[#36572c] required"} htmlFor="text">
+                      Username <span className="text-red-500">*</span>
                     </Label>
                     <Input
-                      id="email"
-                      type="email"
-                      name="email"
-                      value={formData.email}
+                      id="username"
+                      type="username"
+                      name="username"
+                      value={formData.username}
                       onChange={handleChange}
-                      placeholder="m@example.com"
+                      placeholder="example_12"
                       required
                     />
                   </div>
                   <div className="grid gap-2">
-                    <div className="flex items-center">
-                      <Label className={"text-[#36572c]"} htmlFor="password">
-                        Password
-                      </Label>
-                    </div>
-                    <div className="relative">
-                      <Input
-                        id="password"
-                        type={showPassword ? "text" : "password"}
-                        name="password"
-                        value={formData.password}
-                        onChange={handleChange}
-                        required
-                      />
-                      <Button
-                        type="button"
-                        variant={"ghost"}
-                        className={
-                          "w-fit absolute right-0 top-0 px-3 py-2 hover:bg-transparent"
-                        }
-                        onClick={() => setShowPassword(!showPassword)}
-                      >
-                        {showPassword ? (
-                          <EyeOff className="text-gray-600" />
-                        ) : (
-                          <Eye />
-                        )}
-                      </Button>
-                    </div>
+                    <Label className={"text-[#36572c] required"} htmlFor="text">
+                      Fullname <span className="text-red-500">*</span>
+                    </Label>
+                    <Input
+                      id="fullname"
+                      type="fullname"
+                      name="fullname"
+                      value={formData.fullname}
+                      onChange={handleChange}
+                      placeholder=""
+                      required
+                    />
+                  </div>
+                  <div className="grid gap-2">
+                    <Label className={"text-[#36572c] required"} htmlFor="text">
+                      Bio
+                    </Label>
+                    <textarea
+                      id="bio"
+                      name="bio"
+                      value={formData.bio}
+                      onChange={handleChange}
+                      placeholder="Tell us something about yourself..."
+                      required
+                      maxrows={4}
+                      className="w-full rounded-md border shadow:2xl  p-2 focus:outline-none focus:ring-3 focus:ring-gray-600/30  resize-none"
+                    />
                   </div>
                 </div>
               </CardContent>
               <CardFooter className="flex-col gap-2">
                 <Button
                   type="submit"
-                  className="w-full mt-8 hover:bg-[#43634d] bg-[#36572c] cursor-pointer"
+                  className="
+    w-full mt-8 bg-[#36572c] hover:bg-[#43634d] cursor-pointer
+    disabled:opacity-60 disabled:cursor-not-allowed
+  "
                   disabled={loading}
                 >
                   {loading ? (
@@ -168,18 +155,9 @@ const Login = () => {
                       <Loader className="mr-2 animate-spin" />
                     </>
                   ) : (
-                    "Login"
+                    "Complete Profile"
                   )}
                 </Button>
-                <p className="text-center text-sm text-[#36572c]">
-                  Don't have an account?
-                  <span
-                    className="underline cursor-pointer text-[#1f3d16]"
-                    onClick={() => navigate("/register")}
-                  >
-                    Sign up
-                  </span>
-                </p>
               </CardFooter>
             </form>
           </Card>
@@ -189,4 +167,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default OnBoarding;

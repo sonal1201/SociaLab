@@ -22,15 +22,18 @@ model User {
   createdAt  DateTime  @default(now())
   updateAt   DateTime  @updatedAt
   session    Session[]
+
+  profile   OnBoardUser? @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  profileId String?      @unique
 }
 
 model Session {
   id     String @id @default(uuid())
   userId String
-  user   User   @relation(fields: [userId], references: [id])
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
-model onBoardUser {
+model OnBoardUser {
   id              String  @id @default(uuid())
   fullname        String
   username        String  @unique
@@ -39,4 +42,5 @@ model onBoardUser {
 
   createdAt DateTime @default(now())
   updateAt  DateTime @updatedAt
+  user      User?
 }
