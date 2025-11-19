@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { prisma } from "../config/db";
 import bcrypt from 'bcrypt';
 import jwt from "jsonwebtoken"
+import { success } from "zod";
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key'
 
@@ -125,6 +126,7 @@ export const loginUser = async (req: Request, res: Response) => {
 
 
         res.status(200).json({
+            success: true,
             message: "User loggedIn successfully",
             accessToken,
             refreshToken,
