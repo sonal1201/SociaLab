@@ -25,6 +25,14 @@ model User {
 
   profile   OnBoardUser? @relation(fields: [profileId], references: [id], onDelete: Cascade)
   profileId String?      @unique
+
+  followers Follow[] @relation("UserFollowing")
+  following Follow[] @relation("UserFollows")
+
+  posts    Post[]
+  likes    Like[]
+  comments Comment[]
+  stories  Story[]
 }
 
 model Session {
@@ -43,4 +51,69 @@ model OnBoardUser {
   createdAt DateTime @default(now())
   updateAt  DateTime @updatedAt
   user      User?
+}
+
+model Follow {
+  followerId String
+  follower   User   @relation("UserFollows", fields: [followerId], references: [id], onDelete: Cascade)
+
+  followingId String
+  following   User   @relation("UserFollowing", fields: [followingId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@unique([followerId, followingId])
+}
+
+model Post {
+  id String @id @default(uuid())
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+
+  caption String?
+  image   String?
+
+  createdAt DateTime @default(now())
+
+  likes    Like[]
+  comments Comment[]
+}
+
+model Story {
+  id String @id @default(uuid())
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+  caption String?
+  image     String?
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+}
+
+model Like {
+  id String @id @default(uuid())
+
+  post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
+  postId String
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+
+  createdAt DateTime @default(now())
+
+  @@unique([userId, postId])
+}
+
+model Comment {
+  id   String @id @default(uuid())
+  text String
+
+  post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
+  postId String
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+
+  createdAt DateTime @default(now())
 }
