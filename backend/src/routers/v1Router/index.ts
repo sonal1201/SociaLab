@@ -9,6 +9,6 @@ const v1Router = express.Router()
 
 v1Router.use('/user', authRouter)
 v1Router.use('/onBoard', onboardingRouter)
-v1Router.use('/user', authMiddleware, userRoute);
+v1Router.use('/user',  userRoute);
 
 export default v1Router

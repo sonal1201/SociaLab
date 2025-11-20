@@ -62,6 +62,7 @@ model Follow {
 
   createdAt DateTime @default(now())
 
+  @@id([followerId, followingId])
   @@unique([followerId, followingId])
 }
 
@@ -83,9 +84,9 @@ model Post {
 model Story {
   id String @id @default(uuid())
 
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId String
-  caption String?
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  caption   String?
   image     String?
   createdAt DateTime @default(now())
   expiresAt DateTime

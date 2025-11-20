@@ -1,11 +1,13 @@
 import express from "express";
 import { createComment, createPost, createStory, deleteComment, deletePost, deleteStory, followUser, getFeed, likePost, unfollowUser, unlikePost } from "../../controllers/user-controller";
+import { authMiddleware } from "../../middleware/auth-middleware";
 
 const userRoute = express.Router();
 
+userRoute.use(authMiddleware)
 
-userRoute.post("/follow/:id", followUser);
-userRoute.post("/unfollow/:id", unfollowUser);
+userRoute.post("/follow/:followId", followUser);
+userRoute.post("/unfollow/:followId", unfollowUser);
 
 userRoute.post("/posts", createPost);
 userRoute.delete("/posts/:id", deletePost);
