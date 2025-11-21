@@ -1,7 +1,7 @@
 import { Request, Response } from "express"
 import { AuthRequest } from "../middleware/auth-middleware"
 import { prisma } from "../config/db";
-import { error } from "console";
+import { count, error } from "console";
 import uploadOnCloudinary from "../config/cloudinary";
 import { success } from "zod";
 
@@ -321,19 +321,222 @@ export const deletePost = async (req: AuthRequest, res: Response) => {
 }
 
 export const likePost = async (req: AuthRequest, res: Response) => {
+    try {
+        const { postId } = req.params;
+        const userId = req.userId;
 
+        if (!userId) {
+            return res.status(400).json({
+                error: "Unauthorized User"
+            })
+        }
+
+        const post = await prisma.post.findUnique({
+            where: { id: postId }
+        });
+
+        if (!post) {
+            return res.status(404).json({ error: "Post not found" });
+        }
+
+        const alreadyLiked = await prisma.like.findUnique({
+            where: {
+                userId_postId: {
+                    userId,
+                    postId
+                }
+            }
+        })
+
+        if (alreadyLiked) {
+            return res.status(400).json({
+                error: "you Already liked this Post"
+            })
+        }
+
+        await prisma.like.create({
+            data: {
+                userId,
+                postId
+            }
+        });
+
+        const likeCount = await prisma.like.count({
+            where: { postId }
+        });
+
+        return res.status(201).json({
+            success: true,
+            message: "Post liked",
+            likes: likeCount
+        });
+
+
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ error: "likePost Error" });
+    }
 }
 
 export const unlikePost = async (req: AuthRequest, res: Response) => {
+    try {
 
+        const { postId } = req.params;
+        const userId = req.userId;
+
+        if (!userId) {
+            return res.status(400).json({
+                error: "Unauthorized User"
+            })
+        }
+
+        const post = await prisma.post.findUnique({
+            where: { id: postId }
+        });
+
+        if (!post) {
+            return res.status(404).json({ error: "Post not found" });
+        }
+
+        const existingLike = await prisma.like.findUnique({
+            where: {
+                userId_postId: {
+                    userId,
+                    postId
+                }
+            }
+        });
+
+        if (!existingLike) {
+            return res.status(400).json({
+                error: "You have not liked this post"
+            });
+        }
+
+        await prisma.like.delete({
+            where: {
+                userId_postId: {
+                    userId,
+                    postId
+                }
+
+            }
+        })
+
+        const likeCount = await prisma.like.count({
+            where: { postId }
+        });
+
+        return res.status(200).json({
+            success: true,
+            message: "Unliked Post",
+            likes: likeCount
+        });
+
+
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ error: "unLiked Error" });
+    }
 }
 
 export const createComment = async (req: AuthRequest, res: Response) => {
+    try {
+        const { text } = req.body;
+        const { postId } = req.params;
+        const userId = req.userId;
 
+        if (!userId) {
+            return res.status(400).json({
+                error: "Unauthorized User"
+            })
+        }
+
+        if (!text || text.trim() === "") {
+            return res.status(400).json({ error: "Comment cannot be empty" });
+        }
+
+        const post = await prisma.post.findUnique({
+            where: { id: postId }
+        });
+
+        if (!post) {
+            return res.status(404).json({ error: "Post not found" });
+        }
+
+        const comment = await prisma.comment.create({
+            data: {
+                text,
+                userId,
+                postId
+            },
+            include: {
+                user: {
+                    include: { profile: true }
+                }
+            }
+        });
+
+        const commentCount = await prisma.comment.count({
+            where: { postId }
+        });
+
+        return res.status(201).json({
+            success: true,
+            message: "Comment added",
+            comment,
+            commentCount
+        });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ error: "createComment Error" });
+    }
 }
 
 export const deleteComment = async (req: AuthRequest, res: Response) => {
+    try {
+        const { commentId } = req.params
+        const userId = req.userId;
 
+        if (!userId) {
+            return res.status(400).json({
+                error: "Unauthorized User"
+            })
+        }
+
+        const comment = await prisma.comment.findUnique({
+            where: { id: commentId }
+        });
+
+        if (!comment) {
+            return res.status(404).json({ error: "Comment not found" });
+        }
+
+        if (comment.userId !== userId) {
+            return res.status(403).json({
+                error: "You are not allowed to delete this comment"
+            });
+        }
+
+        const postId = comment.postId;
+
+        await prisma.comment.delete({
+            where: { id: commentId }
+        });
+        const commentCount = await prisma.comment.count({
+            where: { postId }
+        });
+
+        return res.status(200).json({
+            success: true,
+            message: "Comment deleted successfully",
+            commentCount
+        });
+
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ error: "deleteComment Error" });
+    }
 }
 
 export const createStory = async (req: AuthRequest, res: Response) => {

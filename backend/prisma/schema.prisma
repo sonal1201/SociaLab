@@ -63,7 +63,6 @@ model Follow {
   createdAt DateTime @default(now())
 
   @@id([followerId, followingId])
-  @@unique([followerId, followingId])
 }
 
 model Post {
