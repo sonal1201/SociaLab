@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useNavigate } from "react-router-dom";
 import { Highlighter } from "@/components/ui/highlighter";
+import FeedBar from "@/components/feedBar";
 
 const Feed = () => {
   const navigate = useNavigate();
@@ -51,17 +52,20 @@ const Feed = () => {
       </div>
 
       <div className="grid grid-cols-12 w-full h-full">
-        {/* LEFT SIDEBAR — hidden on small screens */}
         <div className="col-span-2 px-2 py-4 hidden md:block">
           <StatusSideBar />
         </div>
 
-        {/* CENTER FEED — always visible */}
-        <div className="col-span-12 md:col-span-7 border-x border-gray-300 p-4 min-h-full">
-          <h1>Welcome @{user?.profile?.username}</h1>
+        <div className="col-span-12 md:col-span-7 border-x border-gray-300 p-4 h-[calc(107vh-60px)] scrollbar-hide overflow-y-auto ">
+          <h1>
+            Welcome @
+            <span className="font-bold text-green-900">
+              {user?.profile?.username}
+            </span>
+          </h1>
+          <FeedBar />
         </div>
 
-        {/* RIGHT SIDEBAR — hidden on small screens */}
         <div className="col-span-3 p-4 hidden md:block">
           <ProfileSidebar />
         </div>

@@ -15,7 +15,7 @@ const ProfileSidebar = () => {
                 <img
                   src={user.profile.profileImageUrl}
                   alt="avatar"
-                  className="w-12 h-12 object-cover rounded-full"
+                  className="w-10 h-10 object-cover rounded-full"
                 />
               ) : (
                 <img
@@ -32,7 +32,7 @@ const ProfileSidebar = () => {
               @{user?.profile?.username}
             </div>
 
-            <div className="flex justify-evenly lg:justify-start w-full gap-5 mt-4 text-black">
+            <div className="flex justify-evenly lg:justify-start w-full gap-4 mt-4 text-black">
               <div className="text-center">
                 <h2 className="text-sm text-gray-600">Follower</h2>
                 <h2 className="font-bold">{0}</h2>
