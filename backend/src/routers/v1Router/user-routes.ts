@@ -1,5 +1,5 @@
 import express from "express";
-import { createComment, createPost, createStory, deleteComment, deletePost, deleteStory, followUser, getAllFollower, getAllFollowing, getFeed, getProfile, likePost, unfollowUser, unlikePost } from "../../controllers/user-controller";
+import { createComment, createPost, createStory, deleteComment, deletePost, deleteStory, followUser, getAllFollower, getAllFollowing, getProfile, getStoryFeed, likePost, unfollowUser, unlikePost } from "../../controllers/user-controller";
 import { authMiddleware } from "../../middleware/auth-middleware";
 import { upload } from "../../middleware/multer";
 
@@ -25,10 +25,10 @@ userRoute.delete("/posts/:postId/unlike", unlikePost);
 userRoute.post("/posts/:postId/create-comments", createComment);
 userRoute.delete("/comments/:commentId", deleteComment);
 
-userRoute.post("/stories", createStory);
-userRoute.delete("/stories/:id", deleteStory);
+userRoute.get('/get-stories/feed', getStoryFeed)
+userRoute.post("/stories", upload.single("storyImage"), createStory);
+userRoute.delete("/stories/:storyId", deleteStory);
 
-userRoute.get("/feed", getFeed);
 
 
 export default userRoute;

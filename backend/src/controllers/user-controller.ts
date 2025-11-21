@@ -22,7 +22,8 @@ export const getProfile = async (req: Request, res: Response) => {
                         likes: true,
                         comments: true
                     }
-                }
+                },
+                stories: true
 
             }
         })
@@ -539,14 +540,182 @@ export const deleteComment = async (req: AuthRequest, res: Response) => {
     }
 }
 
-export const createStory = async (req: AuthRequest, res: Response) => {
+export const getStory = async (req: AuthRequest, res: Response) => {
 
+}
+
+export const createStory = async (req: AuthRequest, res: Response) => {
+    try {
+        const userId = req.userId;
+
+        if (!userId) {
+            return res.status(400).json({
+                error: "Unauthorized User"
+            })
+        }
+
+        const { caption } = req.body;
+
+        if (!req.file) {
+            return res.status(400).json({ error: "Image is required for a story" });
+        }
+
+        const imageUrl = await uploadOnCloudinary(req.file.path);
+
+        if (!imageUrl) {
+            return res.status(500).json({ error: "Failed to upload image" });
+        }
+
+        const expiresAt = new Date(Date.now() + 12 * 60 * 60 * 1000);
+
+        const story = await prisma.story.create({
+            data: {
+                userId,
+                caption,
+                image: imageUrl,
+                expiresAt
+            },
+            include: {
+                user: {
+                    include: { profile: true }
+                }
+            }
+        });
+
+        return res.status(201).json({
+            success: true,
+            message: "Story created successfully",
+            story
+        });
+
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ error: "createStory Error" });
+    }
 }
 
 export const deleteStory = async (req: AuthRequest, res: Response) => {
+    try {
+        const { storyId } = req.params
+        const userId = req.userId;
 
+        if (!userId) {
+            return res.status(400).json({
+                error: "Unauthorized User"
+            })
+        }
+
+        const storyExist = await prisma.story.findUnique({
+            where: {
+                id: storyId
+            }
+        })
+
+        if (!storyExist) {
+            return res.status(404).json({
+                error: "Story Not Found"
+            })
+        }
+
+        if (storyExist.userId !== userId) {
+            return res.status(403).json({
+                error: "You cannot delete this story."
+            })
+        }
+
+        await prisma.story.delete({
+            where: {
+                id: storyId
+            }
+        })
+
+        return res.status(200).json({
+            success: true,
+            message: "Story deleted successfully"
+        });
+
+
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ error: "deleteStory Error" });
+    }
 }
 
-export const getFeed = async (req: AuthRequest, res: Response) => {
+type StoryGroup = {
+    user: any;
+    stories: {
+        id: string;
+        caption: string | null;
+        image: string | null;
+        createdAt: Date;
+        expiresAt: Date;
+    }[];
+};
+export const getStoryFeed = async (req: AuthRequest, res: Response) => {
+    try {
+        const userId = req.userId;
 
-}
+        console.log("FEED HIT → userId:", userId);
+
+        if (!userId) {
+            return res.status(400).json({ error: "Unauthorized User" });
+        }
+
+        const following = await prisma.follow.findMany({
+            where: { followerId: userId },
+            select: { followingId: true }
+        });
+
+        const followingIds = following.map(f => f.followingId);
+        followingIds.push(userId);
+
+        if (followingIds.length === 0) {
+            return res.status(200).json({ success: true, stories: [] });
+        }
+
+        const feedStories = await prisma.story.findMany({
+            where: {
+                userId: { in: followingIds },
+                expiresAt: { gt: new Date() }
+            },
+            include: {
+                user: {
+                    include: { profile: true }
+                }
+            },
+            orderBy: { createdAt: "desc" }
+        });
+
+        const grouped = Object.values(
+            feedStories.reduce((acc: any, story) => {
+                const uid = story.userId;
+
+                if (!acc[uid]) {
+                    acc[uid] = {
+                        user: story.user,
+                        stories: []
+                    };
+                }
+
+                acc[uid].stories.push({
+                    id: story.id,
+                    caption: story.caption,
+                    image: story.image,
+                    createdAt: story.createdAt,
+                    expiresAt: story.expiresAt
+                });
+
+                return acc;
+            }, {})
+        );
+
+        return res.status(200).json({
+            success: true,
+            stories: grouped   // spelling fixed
+        });
+
+    } catch (error) {
+        console.log("FEED ERROR:", error);
+        return res.status(500).json({ error: "getStories Error" });
+    }
+};
