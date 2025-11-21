@@ -27,6 +27,7 @@ const OnBoarding = () => {
     username: "",
     fullname: "",
     bio: "",
+    profileImageUrl: "",
   });
 
   const handleChange = (e) => {
@@ -96,6 +97,49 @@ const OnBoarding = () => {
             <form onSubmit={handleSubmit}>
               <CardContent>
                 <div className="flex flex-col gap-6">
+                  <div className="flex flex-col items-center gap-3 mt-2">
+                    <label htmlFor="profileImage" className="cursor-pointer">
+                      <div className="relative w-28 h-28 rounded-full overflow-hidden border-2 border-[#36572c] shadow-md hover:opacity-90 transition">
+                        {formData.profileImageUrl ? (
+                          <img
+                            src={formData.profileImageUrl}
+                            alt="Profile Preview"
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex text-xs items-center text-center justify-center bg-gray-100 text-gray-600">
+                            Upload Photo
+                          </div>
+                        )}
+                      </div>
+                    </label>
+
+                    <label
+                      htmlFor="profileImage"
+                      className="text-[#36572c]  text-sm cursor-pointer hover:underline"
+                    >
+                      Change Your Profile Picture
+                    </label>
+
+                    <input
+                      id="profileImage"
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      //fix this
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (!file) return;
+
+                        const previewUrl = URL.createObjectURL(file);
+
+                        setFormData((prev) => ({
+                          ...prev,
+                          profileImageUrl: previewUrl, // local browser URL
+                        }));
+                      }}
+                    />
+                  </div>
                   <div className="grid gap-2">
                     <Label className={"text-[#36572c] required"} htmlFor="text">
                       Username <span className="text-red-500">*</span>

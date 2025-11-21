@@ -20,7 +20,7 @@ import { getUserData } from "@/context/userContext";
 
 const Login = () => {
   const navigate = useNavigate();
-  const { setUser } = getUserData();
+  const { setUser, setAccessToken } = getUserData();
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
@@ -52,16 +52,11 @@ const Login = () => {
       );
 
       if (res.data.success) {
-        try {
-          localStorage.setItem("accessToken", res.data.accessToken);
-          localStorage.setItem("user", JSON.stringify(res.data.updateUser));
-        } catch (e) {
-          console.warn(
-            "Could not save access token or user to localStorage",
-            e
-          );
-        }
+        localStorage.setItem("accessToken", res.data.accessToken);
+        setAccessToken(res.data.accessToken);
         setUser(res.data.updateUser);
+
+        toast.success(res.data.message || "Logged in");
 
         if (!res.data.updateUser.profileId) {
           navigate("/onboarding");
@@ -69,7 +64,7 @@ const Login = () => {
           navigate("/feed");
         }
 
-        toast.success(res.data.message || "Logged in");
+        return;
       } else {
         toast.error(res.data.message || res.data.error || "Login failed");
       }

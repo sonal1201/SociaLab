@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { prisma } from "../config/db";
 import { AuthRequest } from "../middleware/auth-middleware";
+import uploadOnCloudinary from "../config/cloudinary";
 
 
 
@@ -27,13 +28,20 @@ export const onBoardingUser = async (req: AuthRequest, res: Response) => {
             return res.status(400).json({ error: 'username already exists' });
         }
 
+        let profileImage;
+
+        if (req.file) {
+            profileImage = await uploadOnCloudinary(req.file.path)
+        }
+
+
 
         const profile = await prisma.onBoardUser.create({
             data: {
                 fullname,
                 username,
                 bio,
-                profileImageUrl,
+                profileImageUrl: profileImage,
                 user: {
                     connect: { id: userId }
                 }
@@ -86,13 +94,19 @@ export const updateProfile = async (req: AuthRequest, res: Response) => {
             }
         }
 
+        let profileImage;
+
+        if (req.file) {
+            profileImage = await uploadOnCloudinary(req.file.path)
+        }
+
         const updatedProfile = await prisma.onBoardUser.update({
             where: { id: user.profileId },
             data: {
                 fullname,
                 username,
                 bio,
-                profileImageUrl
+                profileImageUrl: profileImage
             }
         });
 
@@ -106,3 +120,4 @@ export const updateProfile = async (req: AuthRequest, res: Response) => {
         return res.status(500).json({ error: "Internal server error" });
     }
 }
+

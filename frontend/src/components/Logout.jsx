@@ -1,10 +1,11 @@
 import { Button } from "@/components/ui/button";
 import { getUserData } from "@/context/userContext";
 import axios from "axios";
+import { toast } from "sonner";
 import React from "react";
 
-const Logout = () => {
-  const { user, setUser } = getUserData();
+export const useLogout = () => {
+  const { setUser } = getUserData();
   const accessToken = localStorage.getItem("accessToken");
 
   const logoutHandler = async () => {
@@ -24,13 +25,11 @@ const Logout = () => {
         localStorage.clear();
         toast.success(res.data.message);
       }
-    } catch (error) {}
+    } catch (error) {
+      toast.error("Logout failed");
+    }
   };
-  return (
-    <div>
-      <Button onClick={logoutHandler}>Logout</Button>
-    </div>
-  );
+
+  return logoutHandler;
 };
 
-export default Logout;

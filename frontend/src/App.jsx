@@ -5,6 +5,7 @@ import Register from "./pages/Register";
 import Login from "./pages/Login";
 import ProtectedRoute from "./components/ProtectedRoute";
 import OnBoarding from "./pages/OnBoarding";
+import Profile from "./pages/Profile";
 
 const router = createBrowserRouter([
   {
@@ -25,7 +26,19 @@ const router = createBrowserRouter([
   },
   {
     path: "/onboarding",
-    element: <OnBoarding />,
+    element: (
+      <ProtectedRoute>
+        <OnBoarding />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/profile",
+    element: (
+      <ProtectedRoute>
+        <Profile />
+      </ProtectedRoute>
+    ),
   },
   {
     path: "/login",
