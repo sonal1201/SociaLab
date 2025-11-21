@@ -1,6 +1,7 @@
 import express from "express";
 import { createComment, createPost, createStory, deleteComment, deletePost, deleteStory, followUser, getAllFollower, getAllFollowing, getFeed, getProfile, likePost, unfollowUser, unlikePost } from "../../controllers/user-controller";
 import { authMiddleware } from "../../middleware/auth-middleware";
+import { upload } from "../../middleware/multer";
 
 const userRoute = express.Router();
 
@@ -14,8 +15,8 @@ userRoute.get('/get-follower/:userId', getAllFollower)
 userRoute.get('/get-following/:userId', getAllFollowing)
 
 
-userRoute.post("/posts", createPost);
-userRoute.delete("/posts/:id", deletePost);
+userRoute.post("/posts",upload.single("postImage"), createPost);
+userRoute.delete("/posts/:postId", deletePost);
 
 userRoute.post("/posts/:id/like", likePost);
 userRoute.delete("/posts/:id/unlike", unlikePost);

@@ -1,6 +1,9 @@
 import { Request, Response } from "express"
 import { AuthRequest } from "../middleware/auth-middleware"
 import { prisma } from "../config/db";
+import { error } from "console";
+import uploadOnCloudinary from "../config/cloudinary";
+import { success } from "zod";
 
 
 export const getProfile = async (req: Request, res: Response) => {
@@ -14,7 +17,12 @@ export const getProfile = async (req: Request, res: Response) => {
             },
             include: {
                 profile: true,
-                posts: true
+                posts: {
+                    include: {
+                        likes: true,
+                        comments: true
+                    }
+                }
 
             }
         })
@@ -202,11 +210,114 @@ export const getAllFollowing = async (req: AuthRequest, res: Response) => {
 
 
 export const createPost = async (req: AuthRequest, res: Response) => {
+    try {
+        const { caption, image } = req.body;
 
+        console.log("req.userId from middleware:", req.userId);
+        console.log("Creating post with caption:", caption);
+
+
+        const userId = req.userId
+
+        if (!userId) {
+            return res.status(401).json({
+                error: "Unauthorized User"
+            })
+        }
+
+        if (!caption && !image) {
+            return res.status(400).json({
+                error: "Post must include a caption or an image",
+            });
+        }
+
+        let imageUrl = null;
+        if (req.file) {
+            imageUrl = await uploadOnCloudinary(req.file.path);
+        }
+
+        const created = await prisma.post.create({
+            data: {
+                caption,
+                image: imageUrl,
+                userId
+            },
+            include: {
+                user: {
+                    include: {
+                        profile: true
+                    }
+                },
+                likes: {
+                    include: {
+                        user: {
+                            include: {
+                                profile: true
+                            }
+                        }
+                    }
+                },
+                comments: {
+                    include: {
+                        user: {
+                            include: {
+                                profile: true
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        return res.status(201).json({
+            success: true,
+            post: created
+        });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ error: "createPost Error" });
+    }
 }
 
 export const deletePost = async (req: AuthRequest, res: Response) => {
+    try {
+        const { postId } = req.params
 
+        const userId = req.userId
+
+        if (!userId) {
+            return res.status(401).json({
+                error: "Unauthorized User"
+            })
+        }
+
+        const post = await prisma.post.findUnique({
+            where: { id: postId }
+        })
+
+        if (!post) {
+            return res.status(404).json({ error: "Post not found" })
+        }
+
+        if (post.userId !== userId) {
+            return res.status(403).json({ error: "You are not allowed to delete this post" })
+        }
+
+        const deletePost = await prisma.post.delete({
+            where: {
+                id: postId
+            }
+        })
+
+        res.status(200).json({
+            success: true,
+            message: "Post deleted successfully"
+        })
+
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ error: "deletePost Error" });
+    }
 }
 
 export const likePost = async (req: AuthRequest, res: Response) => {
