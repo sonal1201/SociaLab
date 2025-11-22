@@ -23,7 +23,9 @@ export const getProfile = async (req: Request, res: Response) => {
                         comments: true
                     }
                 },
-                stories: true
+                stories: true,
+                followers: true,
+                following: true
 
             }
         })
@@ -43,8 +45,44 @@ export const getProfile = async (req: Request, res: Response) => {
             error: "getProfile Error"
         })
     }
-
 }
+
+export const getAlluser = async (req: AuthRequest, res: Response) => {
+    try {
+        const currentUserId = req.userId;
+
+        // Get all users except me
+        let users = await prisma.user.findMany({
+            where: { id: { not: currentUserId } },
+            include: { profile: true },
+        });
+
+        // Get all I already follow
+        const alreadyFollowing = await prisma.follow.findMany({
+            where: { followerId: currentUserId },
+            select: { followingId: true },
+        });
+
+        const followingIds = alreadyFollowing.map((f) => f.followingId);
+
+        // Filter out users I already follow
+        const filteredUsers = users.filter(
+            (u) => !followingIds.includes(u.id)
+        );
+
+        return res.status(200).json({
+            success: true,
+            users: filteredUsers,
+        });
+    } catch (error) {
+        console.log("getAlluser Error:", error);
+        return res.status(400).json({
+            success: false,
+            error: "getAlluser Error",
+        });
+    }
+};
+
 
 export const followUser = async (req: AuthRequest, res: Response) => {
     try {
@@ -226,12 +264,12 @@ export const createPost = async (req: AuthRequest, res: Response) => {
             })
         }
 
-        if (!caption && !image) {
+        if (!caption && !req.file) {
             return res.status(400).json({
                 error: "Post must include a caption or an image",
             });
         }
-
+        
         let imageUrl = null;
         if (req.file) {
             imageUrl = await uploadOnCloudinary(req.file.path);
@@ -641,16 +679,22 @@ export const deleteStory = async (req: AuthRequest, res: Response) => {
     }
 }
 
-type StoryGroup = {
-    user: any;
+interface GroupedStory {
+    user: {
+        id: string;
+        profile: {
+            username: string;
+            profileImageUrl: string | null;
+        };
+    };
     stories: {
         id: string;
         caption: string | null;
-        image: string | null;
+        image: string;
         createdAt: Date;
         expiresAt: Date;
     }[];
-};
+}
 export const getStoryFeed = async (req: AuthRequest, res: Response) => {
     try {
         const userId = req.userId;
@@ -686,7 +730,7 @@ export const getStoryFeed = async (req: AuthRequest, res: Response) => {
             orderBy: { createdAt: "desc" }
         });
 
-        const grouped = Object.values(
+        const grouped: GroupedStory[] = Object.values(
             feedStories.reduce((acc: any, story) => {
                 const uid = story.userId;
 
@@ -711,11 +755,61 @@ export const getStoryFeed = async (req: AuthRequest, res: Response) => {
 
         return res.status(200).json({
             success: true,
-            stories: grouped   // spelling fixed
+            stories: grouped
         });
 
     } catch (error) {
         console.log("FEED ERROR:", error);
         return res.status(500).json({ error: "getStories Error" });
+    }
+};
+
+
+export const getFeed = async (req: AuthRequest, res: Response) => {
+    try {
+        const userId = req.userId;
+
+        // Get list of all users current user follows
+        const following = await prisma.follow.findMany({
+            where: { followerId: userId },
+            select: { followingId: true }
+        });
+
+        // Extract their IDs
+        const followingIds = following.map(f => f.followingId);
+
+        // Include your own posts also
+        followingIds.push(userId as string);
+
+        // Fetch posts from all followed users + yourself
+        const posts = await prisma.post.findMany({
+            where: { userId: { in: followingIds } },
+            include: {
+                user: {
+                    include: { profile: true }
+                },
+                likes: true,
+                comments: {
+                    include: {
+                        user: { include: { profile: true } }
+                    }
+                }
+            },
+            orderBy: {
+                createdAt: "desc"
+            }
+        });
+
+        return res.status(200).json({
+            success: true,
+            posts
+        });
+
+    } catch (error) {
+        console.log("getFeed Error:", error);
+        return res.status(500).json({
+            success: false,
+            error: "Feed loading failed"
+        });
     }
 };

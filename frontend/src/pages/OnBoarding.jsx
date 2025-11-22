@@ -20,6 +20,7 @@ import { getUserData } from "@/context/userContext";
 
 const OnBoarding = () => {
   const navigate = useNavigate();
+  const [profileImageFile, setProfileImageFile] = useState(null);
   const { setUser } = getUserData();
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -38,39 +39,63 @@ const OnBoarding = () => {
     }));
   };
 
+  const onChangeHandler = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setProfileImageFile(file);
+
+    const previewUrl = URL.createObjectURL(file);
+    setFormData((prev) => ({
+      ...prev,
+      profileImageUrl: previewUrl,
+    }));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log(formData);
+    setLoading(true);
+
     try {
-      setLoading(true);
+      const token = localStorage.getItem("accessToken");
+      const fd = new FormData();
+
+      fd.append("username", formData.username);
+      fd.append("fullname", formData.fullname);
+      fd.append("bio", formData.bio);
+
+      if (profileImageFile) {
+        fd.append("profileImage", profileImageFile);
+      }
+
       const res = await axios.post(
         "http://localhost:3001/api/v1/onBoard/",
-        formData,
+        fd,
         {
           headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "multipart/form-data",
           },
         }
       );
 
       if (res.data.success) {
-        navigate("/feed");
         toast.success(res.data.message);
+        navigate("/feed");
       } else {
-        toast.error(res.data.message || res.data.error || "Login failed");
+        toast.error(res.data.message || "Failed");
       }
     } catch (error) {
-      const message =
-        error.response?.data?.error ||
+      const msg =
         error.response?.data?.message ||
+        error.response?.data?.error ||
         "Something went wrong";
-
-      toast.error(message);
-    } finally {
-      setLoading(false);
+      toast.error(msg);
     }
+
+    setLoading(false);
   };
+
   return (
     <div className="relative h-screen w-full bg-linear-to-b from-[#6b8c75] to-[#dff6e9] overflow-hidden">
       <div className="min-h-screen flex flex-col to-muted/20">
@@ -127,17 +152,7 @@ const OnBoarding = () => {
                       accept="image/*"
                       className="hidden"
                       //fix this
-                      onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        if (!file) return;
-
-                        const previewUrl = URL.createObjectURL(file);
-
-                        setFormData((prev) => ({
-                          ...prev,
-                          profileImageUrl: previewUrl, // local browser URL
-                        }));
-                      }}
+                      onChange={onChangeHandler}
                     />
                   </div>
                   <div className="grid gap-2">

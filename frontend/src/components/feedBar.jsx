@@ -1,29 +1,74 @@
 import React, { useState } from "react";
+import axios from "axios";
 import { getUserData } from "@/context/userContext";
 import LikeButton from "./ui/likeButton";
 import CommentButton from "./ui/CommentButton";
+import { toast } from "sonner";
+import FeedComponent from "./FeedComponent";
 
-const FeedBar = () => {
+const FeedBar = ({ refreshFeed }) => {
   const { user } = getUserData();
 
   const [postText, setPostText] = useState("");
   const [imagePreview, setImagePreview] = useState(null);
+  const [postImage, setPostImage] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
-    const imageUrl = URL.createObjectURL(file);
-    setImagePreview(imageUrl);
+    setPostImage(file);
+    setImagePreview(URL.createObjectURL(file));
 
     e.target.value = null;
   };
 
   const removeImage = () => {
+    setPostImage(null);
     setImagePreview(null);
 
     const fileInput = document.getElementById("postImageInput");
     if (fileInput) fileInput.value = "";
+  };
+
+  // ⬅ REAL POST UPLOAD FUNCTION
+  const uploadPost = async () => {
+    if (!postText.trim() && !postImage) {
+      toast.error("Write something or add an image!");
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      const token = localStorage.getItem("accessToken");
+
+      const formData = new FormData();
+      formData.append("caption", postText);
+      if (postImage) formData.append("postImage", postImage);
+
+      await axios.post("http://localhost:3001/api/v1/user/posts", formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      toast.success("Post uploaded!");
+
+      // Reset UI
+      setPostText("");
+      removeImage();
+
+      // Refresh feed if parent passed function
+      refreshFeed && refreshFeed();
+    } catch (error) {
+      console.log("Post upload error:", error);
+      toast.error("Failed to upload post");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -38,11 +83,11 @@ const FeedBar = () => {
         <div className="flex-1">
           <textarea
             placeholder="What's on your mind?"
-            rows={2}
+            rows={4}
             value={postText}
             onChange={(e) => setPostText(e.target.value)}
             className="w-full bg-transparent border-none outline-none resize-none 
-                    text-gray-800 placeholder-gray-500"
+              text-gray-800 placeholder-gray-500 "
           />
 
           {imagePreview && (
@@ -59,8 +104,8 @@ const FeedBar = () => {
             {!imagePreview ? (
               <label
                 className="cursor-pointer text-[#36572c] text-sm font-medium 
-                        border border-gray-300 rounded-full px-4 py-1 
-                        hover:bg-gray-100 transition"
+                  border border-gray-300 rounded-full px-4 py-1 
+                  hover:bg-gray-100 transition"
               >
                 <input
                   id="postImageInput"
@@ -74,161 +119,26 @@ const FeedBar = () => {
             ) : (
               <button
                 onClick={removeImage}
-                className=" cursor-pointer text-[#36572c] text-sm font-medium 
-                        border border-gray-300 rounded-full px-4 py-1 
-                        hover:bg-gray-100 transition"
+                className="cursor-pointer text-[#36572c] text-sm font-medium 
+                  border border-gray-300 rounded-full px-4 py-1 
+                  hover:bg-gray-100 transition"
               >
                 Remove Image
               </button>
             )}
 
-            <button className="hover:bg-[#43634d] bg-[#36572c] cursor-pointer text-white px-4 py-1 rounded-full">
-              Post
+            <button
+              onClick={uploadPost}
+              disabled={loading}
+              className="hover:bg-[#43634d] bg-[#36572c] text-white px-4 py-1 
+                rounded-full cursor-pointer disabled:opacity-50"
+            >
+              {loading ? "Posting..." : "Post"}
             </button>
           </div>
         </div>
       </div>
-
-      <div className="flex-1  py-4 space-y-6">
-        <div className="border border-gray-200 rounded-xl p-4 shadow-sm">
-          <div className="flex items-center gap-3 mb-3">
-            <img src="/default-avatar.png" className="w-10 h-10 rounded-full" />
-            <div>
-              <p className="font-semibold">@username</p>
-              <span className="text-xs text-gray-500">2 hours ago</span>
-            </div>
-          </div>
-
-          <p className="text-gray-700 mb-3">
-            This is a sample post. Add your UI here.
-          </p>
-
-          <img
-            src="/default-avatar.png"
-            className="w-full rounded-xl"
-            alt="post"
-          />
-
-          <div className="flex items-center justify-start gap-7 mt-4 text-gray-600">
-            <LikeButton />
-            <CommentButton />
-          </div>
-          
-        </div>
-        
-      </div>
-      <div className="flex-1  py-4 space-y-6">
-        <div className="border border-gray-200 rounded-xl p-4 shadow-sm">
-          <div className="flex items-center gap-3 mb-3">
-            <img src="/default-avatar.png" className="w-10 h-10 rounded-full" />
-            <div>
-              <p className="font-semibold">@username</p>
-              <span className="text-xs text-gray-500">2 hours ago</span>
-            </div>
-          </div>
-
-          <p className="text-gray-700 mb-3">
-            This is a sample post. Add your UI here.
-          </p>
-
-          <img
-            src="/default-avatar.png"
-            className="w-full rounded-xl"
-            alt="post"
-          />
-
-          <div className="flex items-center justify-start gap-7 mt-4 text-gray-600">
-            <LikeButton />
-            <CommentButton />
-          </div>
-          
-        </div>
-        
-      </div>
-      <div className="flex-1  py-4 space-y-6">
-        <div className="border border-gray-200 rounded-xl p-4 shadow-sm">
-          <div className="flex items-center gap-3 mb-3">
-            <img src="/default-avatar.png" className="w-10 h-10 rounded-full" />
-            <div>
-              <p className="font-semibold">@username</p>
-              <span className="text-xs text-gray-500">2 hours ago</span>
-            </div>
-          </div>
-
-          <p className="text-gray-700 mb-3">
-            This is a sample post. Add your UI here.
-          </p>
-
-          <img
-            src="/default-avatar.png"
-            className="w-full rounded-xl"
-            alt="post"
-          />
-
-          <div className="flex items-center justify-start gap-7 mt-4 text-gray-600">
-            <LikeButton />
-            <CommentButton />
-          </div>
-          
-        </div>
-        
-      </div>
-      <div className="flex-1  py-4 space-y-6">
-        <div className="border border-gray-200 rounded-xl p-4 shadow-sm">
-          <div className="flex items-center gap-3 mb-3">
-            <img src="/default-avatar.png" className="w-10 h-10 rounded-full" />
-            <div>
-              <p className="font-semibold">@username</p>
-              <span className="text-xs text-gray-500">2 hours ago</span>
-            </div>
-          </div>
-
-          <p className="text-gray-700 mb-3">
-            This is a sample post. Add your UI here.
-          </p>
-
-          <img
-            src="/default-avatar.png"
-            className="w-full rounded-xl"
-            alt="post"
-          />
-
-          <div className="flex items-center justify-start gap-7 mt-4 text-gray-600">
-            <LikeButton />
-            <CommentButton />
-          </div>
-          
-        </div>
-        
-      </div>
-      <div className="flex-1  py-4 space-y-6">
-        <div className="border border-gray-200 rounded-xl p-4 shadow-sm">
-          <div className="flex items-center gap-3 mb-3">
-            <img src="/default-avatar.png" className="w-10 h-10 rounded-full" />
-            <div>
-              <p className="font-semibold">@username</p>
-              <span className="text-xs text-gray-500">2 hours ago</span>
-            </div>
-          </div>
-
-          <p className="text-gray-700 mb-3">
-            This is a sample post. Add your UI here.
-          </p>
-
-          <img
-            src="/default-avatar.png"
-            className="w-full rounded-xl"
-            alt="post"
-          />
-
-          <div className="flex items-center justify-start gap-7 mt-4 text-gray-600">
-            <LikeButton />
-            <CommentButton />
-          </div>
-          
-        </div>
-        
-      </div>
+      <FeedComponent/>
     </div>
   );
 };
