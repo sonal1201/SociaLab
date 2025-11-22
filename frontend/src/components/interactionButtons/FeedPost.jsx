@@ -2,7 +2,6 @@ import React from "react";
 import LikeButton from "../ui/LikeButton";
 import CommentButton from "../ui/CommentButton";
 
-
 const FeedPost = ({ post }) => {
   const profile = post.user.profile;
 
@@ -26,12 +25,12 @@ const FeedPost = ({ post }) => {
       {post.caption && <p className="text-gray-700 mb-3">{post.caption}</p>}
 
       {/* Image */}
-      {post.imageUrl && (
-        <img src={post.imageUrl} className="w-full rounded-xl object-cover" />
+      {post.image && (
+        <img src={post.image} className="w-full rounded-xl object-cover" />
       )}
 
       {/* Buttons */}
-      <div className="flex items-center justify-start gap-7 mt-4 text-gray-600">
+      <div className="flex items-center justify-start gap-5 mt-4 text-gray-600">
         <LikeButton postId={post.id} likedBy={post.likes} />
         <CommentButton postId={post.id} comments={post.comments} />
       </div>

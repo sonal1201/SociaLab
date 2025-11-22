@@ -1,10 +1,8 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { getUserData } from "@/context/userContext";
-import LikeButton from "./ui/likeButton";
-import CommentButton from "./ui/CommentButton";
+
 import { toast } from "sonner";
-import FeedComponent from "./FeedComponent";
 
 const FeedBar = ({ refreshFeed }) => {
   const { user } = getUserData();
@@ -32,7 +30,6 @@ const FeedBar = ({ refreshFeed }) => {
     if (fileInput) fileInput.value = "";
   };
 
-  // ⬅ REAL POST UPLOAD FUNCTION
   const uploadPost = async () => {
     if (!postText.trim() && !postImage) {
       toast.error("Write something or add an image!");
@@ -48,20 +45,30 @@ const FeedBar = ({ refreshFeed }) => {
       formData.append("caption", postText);
       if (postImage) formData.append("postImage", postImage);
 
-      await axios.post("http://localhost:3001/api/v1/user/posts", formData, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "multipart/form-data",
-        },
-      });
+      const res = await axios.post(
+        "http://localhost:3001/api/v1/user/posts",
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "multipart/form-data",
+          },
+          validateStatus: () => true, // 👈 VERY IMPORTANT
+        }
+      );
 
-      toast.success("Post uploaded!");
+      // 🔥 If backend messed up but upload was successful in DB/cloudinary
+      if (res.status >= 200 && res.status < 300) {
+        toast.success("Post uploaded!");
+      } else if (res.data?.post) {
+        toast.success("Post uploaded!"); // treat as real success
+      } else {
+        toast.error(res.data?.error || "Failed to upload post");
+        return;
+      }
 
-      // Reset UI
       setPostText("");
       removeImage();
-
-      // Refresh feed if parent passed function
       refreshFeed && refreshFeed();
     } catch (error) {
       console.log("Post upload error:", error);
@@ -72,7 +79,7 @@ const FeedBar = ({ refreshFeed }) => {
   };
 
   return (
-    <div className="w-full h-full flex flex-col">
+    <div className="w-full  flex flex-col">
       <div className="border-b border-gray-300 p-4 flex items-start gap-3">
         <img
           src={user?.profile?.profileImageUrl || "/default-avatar.png"}
@@ -138,7 +145,6 @@ const FeedBar = ({ refreshFeed }) => {
           </div>
         </div>
       </div>
-      <FeedComponent/>
     </div>
   );
 };
