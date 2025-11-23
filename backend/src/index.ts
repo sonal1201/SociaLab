@@ -16,6 +16,15 @@ app.use(cors({
     credentials: true
 }))
 
+app.get("/ping", (req, res) => {
+  res.status(200).json({ 
+    success: true,
+    message: "Pong! Server is alive.",
+    time: new Date().toISOString()
+  });
+});
+
+
 app.use('/api/v1', v1Router)
 
 
