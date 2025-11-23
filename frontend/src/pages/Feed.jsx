@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { getUserData } from "@/context/userContext";
-import FeedBar from "@/components/FeedBar.jsx";
 import FeedComponent from "@/components/FeedComponent.jsx";
+import FeedBarr from "@/components/FeedBarr";
 
 const Feed = () => {
   const { user } = getUserData();
@@ -16,7 +16,7 @@ const Feed = () => {
         </span>
       </h1>
 
-      <FeedBar refreshFeed={() => setRefreshKey((k) => k + 1)} />
+      <FeedBarr refreshFeed={() => setRefreshKey((k) => k + 1)} />
 
       <FeedComponent key={refreshKey} />
     </div>

@@ -4,7 +4,7 @@ import { getUserData } from "@/context/userContext";
 
 import { toast } from "sonner";
 
-const FeedBar = ({ refreshFeed }) => {
+const FeedBarr = ({ refreshFeed }) => {
   const { user } = getUserData();
 
   const [postText, setPostText] = useState("");
@@ -45,22 +45,22 @@ const FeedBar = ({ refreshFeed }) => {
       formData.append("caption", postText);
       if (postImage) formData.append("postImage", postImage);
 
-      const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/v1/user/posts`,
+      const res = await axios.post(
+        `${import.meta.env.VITE_API_URL}/api/v1/user/posts`,
         formData,
         {
           headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "multipart/form-data",
           },
-          validateStatus: () => true, 
+          validateStatus: () => true,
         }
       );
-
 
       if (res.status >= 200 && res.status < 300) {
         toast.success("Post uploaded!");
       } else if (res.data?.post) {
-        toast.success("Post uploaded!"); 
+        toast.success("Post uploaded!");
       } else {
         toast.error(res.data?.error || "Failed to upload post");
         return;
@@ -148,4 +148,4 @@ const FeedBar = ({ refreshFeed }) => {
   );
 };
 
-export default FeedBar;
+export default FeedBarr;
