@@ -25,7 +25,6 @@ app.use(cors({
     credentials: true
 }));
 
-app.options("*", cors());
 
 app.get("/ping", (req, res) => {
     res.status(200).json({
@@ -34,6 +33,8 @@ app.get("/ping", (req, res) => {
         time: new Date().toISOString()
     });
 });
+
+//corsfixxx
 
 app.use('/api/v1', v1Router)
 
