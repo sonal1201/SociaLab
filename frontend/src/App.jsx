@@ -8,10 +8,10 @@ import Profile from "./pages/Profile";
 import OnBoarding from "./pages/OnBoarding";
 import ProtectedRoute from "./components/ProtectedRoute";
 import MainLayout from "./pages/MainLayout";
-
+import Home from "./pages/Home";
 
 const router = createBrowserRouter([
-  { path: "/", element: <Login /> },
+  { path: "/", element: <Home /> },
   { path: "/login", element: <Login /> },
   { path: "/register", element: <Register /> },
 
