@@ -3,9 +3,12 @@ import axios from "axios";
 import { getUserData } from "@/context/userContext";
 import { toast } from "sonner";
 import { RefreshCw } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const SuggestedUsers = () => {
   const { user } = getUserData();
+  const navigate = useNavigate();
+
   const [suggested, setSuggested] = useState([]);
   const [loadingId, setLoadingId] = useState(null);
   const [refreshing, setRefreshing] = useState(false);
@@ -43,16 +46,11 @@ const SuggestedUsers = () => {
 
       let users = res.data.users || [];
 
-      if (!user?.id) return;
-
-      // Remove my account + remove already followed users
       users = users
         .filter((u) => u.id !== user.id)
         .filter((u) => !followingIds.includes(u.id));
 
-      const randomUsers = shuffleArray(users).slice(0, 7);
-
-      setSuggested(randomUsers);
+      setSuggested(shuffleArray(users).slice(0, 7));
     } catch (error) {
       console.log("Suggested Users Error:", error);
     }
@@ -74,13 +72,8 @@ const SuggestedUsers = () => {
 
     await fetchSuggestedUsers();
 
-    setTimeout(() => {
-      setRefreshing(false);
-    }, 10000);
-
-    setTimeout(() => {
-      setCooldown(false);
-    }, 10000);
+    setTimeout(() => setRefreshing(false), 10000);
+    setTimeout(() => setCooldown(false), 10000);
   };
 
   const followUser = async (followId) => {
@@ -97,8 +90,6 @@ const SuggestedUsers = () => {
       toast.success("Followed successfully");
 
       setSuggested((prev) => prev.filter((u) => u.id !== followId));
-
-      onFollowChange && onFollowChange();
     } catch (error) {
       toast.error("Failed to follow");
     } finally {
@@ -115,7 +106,7 @@ const SuggestedUsers = () => {
           onClick={refreshSuggestions}
           disabled={cooldown}
           className={`p-1 rounded-md cursor-pointer transition 
-    ${cooldown ? "opacity-40 cursor-not-allowed" : "hover:bg-gray-200"}`}
+            ${cooldown ? "opacity-40 cursor-not-allowed" : "hover:bg-gray-200"}`}
         >
           <RefreshCw
             size={16}
@@ -133,20 +124,28 @@ const SuggestedUsers = () => {
           {suggested.map((u) => (
             <div
               key={u.id}
-              className="flex items-center gap-3 p-2 hover:bg-gray-100 rounded-lg cursor-pointer"
+              className="flex items-center gap-3 p-2 hover:bg-gray-100 rounded-lg"
             >
-              <img
-                src={u.profile?.profileImageUrl || "/default-avatar.png"}
-                className="w-10 h-10 rounded-full object-cover"
-              />
 
-              <div className="flex-1">
-                <p className="font-medium text-black">@{u.profile?.username}</p>
-                <p className="text-xs text-gray-500">{u.profile?.fullname}</p>
+              <div
+                className="flex items-center gap-3 flex-1 cursor-pointer"
+                onClick={() => navigate(`/profile/${u.id}`)}
+              >
+                <img
+                  src={u.profile?.profileImageUrl || "/default-avatar.png"}
+                  className="w-10 h-10 rounded-full object-cover"
+                />
+
+                <div>
+                  <p className="font-medium text-black">
+                    @{u.profile?.username}
+                  </p>
+                  <p className="text-xs text-gray-500">{u.profile?.fullname}</p>
+                </div>
               </div>
 
               <button
-                className="bg-[#36572c] text-white text-xs px-3 py-1 rounded-md disabled:opacity-50"
+                className="bg-[#36572c] text-white text-xs cursor-pointer px-3 py-1 rounded-md disabled:opacity-50"
                 disabled={loadingId === u.id}
                 onClick={() => followUser(u.id)}
               >
