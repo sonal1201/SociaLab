@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { getUserData } from "@/context/userContext";
-import FeedBar from "@/components/FeedBar";
-import FeedComponent from "@/components/FeedComponent";
+import FeedBar from "@/components/FeedBar.jsx";
+import FeedComponent from "@/components/FeedComponent.jsx";
 
 const Feed = () => {
   const { user } = getUserData();
