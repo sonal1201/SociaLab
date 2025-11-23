@@ -29,8 +29,7 @@ const StatusSideBar = () => {
     try {
       const token = localStorage.getItem("accessToken");
 
-      const res = await axios.get(
-        "http://localhost:3001/api/v1/user/get-stories/feed",
+      const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/v1/user/get-stories/feed`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -102,7 +101,7 @@ const StatusSideBar = () => {
     formData.append("caption", caption);
 
     try {
-      await axios.post("http://localhost:3001/api/v1/user/stories", formData, {
+      await axios.post(`${import.meta.env.VITE_API_URL}/api/v1/user/stories`, formData, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "multipart/form-data",

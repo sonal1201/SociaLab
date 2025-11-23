@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import FeedPost from "./interactionButtons/FeedPost";
 
-
 const FeedComponent = () => {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -11,9 +10,12 @@ const FeedComponent = () => {
     try {
       const token = localStorage.getItem("accessToken");
 
-      const res = await axios.get("http://localhost:3001/api/v1/user/feed", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const res = await axios.get(
+        `${import.meta.env.VITE_API_URL}/api/v1/user/feed`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
 
       setPosts(res.data.posts || []);
     } catch (error) {

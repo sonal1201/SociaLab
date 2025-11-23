@@ -68,8 +68,7 @@ const OnBoarding = () => {
         fd.append("profileImage", profileImageFile);
       }
 
-      const res = await axios.post(
-        "http://localhost:3001/api/v1/onBoard/",
+      const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/v1/onBoard/`,
         fd,
         {
           headers: {

@@ -41,8 +41,7 @@ const Login = () => {
     console.log(formData);
     try {
       setLoading(true);
-      const res = await axios.post(
-        "http://localhost:3001/api/v1/user/login",
+      const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/v1/user/login`,
         formData,
         {
           headers: {

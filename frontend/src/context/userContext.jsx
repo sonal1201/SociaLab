@@ -22,7 +22,7 @@ export const UserProvider = ({ children }) => {
     }
 
     try {
-      const res = await fetch("http://localhost:3001/api/v1/user/me", {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/v1/user/me`, {
         headers: { Authorization: `Bearer ${accessToken}` },
       });
 

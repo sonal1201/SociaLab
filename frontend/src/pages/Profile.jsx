@@ -55,8 +55,8 @@ const Profile = () => {
       const token = localStorage.getItem("accessToken");
 
       const url = isFollowing
-        ? `http://localhost:3001/api/v1/user/unfollow/${finalUserId}`
-        : `http://localhost:3001/api/v1/user/follow/${finalUserId}`;
+        ? `${import.meta.env.VITE_API_URL}/api/v1/user/unfollow/${finalUserId}`
+        : `${import.meta.env.VITE_API_URL}/api/v1/user/follow/${finalUserId}`;
 
       await axios.post(
         url,

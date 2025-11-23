@@ -24,7 +24,7 @@ const SuggestedUsers = () => {
       const token = localStorage.getItem("accessToken");
 
       const res = await axios.get(
-        `http://localhost:3001/api/v1/user/get-following/${user.id}`,
+        `${import.meta.env.VITE_API_URL}/api/v1/user/get-following/${user.id}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
@@ -40,7 +40,7 @@ const SuggestedUsers = () => {
       const token = localStorage.getItem("accessToken");
 
       const res = await axios.get(
-        "http://localhost:3001/api/v1/user/all-users",
+        `${import.meta.env.VITE_API_URL}/api/v1/user/all-users`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
@@ -82,7 +82,7 @@ const SuggestedUsers = () => {
       const token = localStorage.getItem("accessToken");
 
       await axios.post(
-        `http://localhost:3001/api/v1/user/follow/${followId}`,
+        `${import.meta.env.VITE_API_URL}/api/v1/user/follow/${followId}`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -126,7 +126,6 @@ const SuggestedUsers = () => {
               key={u.id}
               className="flex items-center gap-3 p-2 hover:bg-gray-100 rounded-lg"
             >
-
               <div
                 className="flex items-center gap-3 flex-1 cursor-pointer"
                 onClick={() => navigate(`/profile/${u.id}`)}

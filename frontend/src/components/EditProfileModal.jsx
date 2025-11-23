@@ -65,7 +65,7 @@ const EditProfileModal = ({ open, setOpen }) => {
       const token = localStorage.getItem("accessToken");
 
       const res = await axios.put(
-        "http://localhost:3001/api/v1/onBoard/edit-profile",
+        `${import.meta.env.VITE_API_URL}/api/v1/onBoard/edit-profile`,
         fd,
         {
           headers: { Authorization: `Bearer ${token}` },

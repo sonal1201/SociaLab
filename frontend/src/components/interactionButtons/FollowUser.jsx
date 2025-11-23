@@ -13,7 +13,7 @@ const FollowUser = ({ userId, initialFollowState }) => {
       const token = localStorage.getItem("accessToken");
 
       const res = await axios.post(
-        `http://localhost:3001/api/v1/user/follow/${userId}`,
+        `${import.meta.env.VITE_API_URL}/api/v1/user/follow/${userId}`,
         {},
         {
           headers: {

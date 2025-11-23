@@ -45,23 +45,22 @@ const FeedBar = ({ refreshFeed }) => {
       formData.append("caption", postText);
       if (postImage) formData.append("postImage", postImage);
 
-      const res = await axios.post(
-        "http://localhost:3001/api/v1/user/posts",
+      const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/v1/user/posts`,
         formData,
         {
           headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "multipart/form-data",
           },
-          validateStatus: () => true, // 👈 VERY IMPORTANT
+          validateStatus: () => true, 
         }
       );
 
-      // 🔥 If backend messed up but upload was successful in DB/cloudinary
+
       if (res.status >= 200 && res.status < 300) {
         toast.success("Post uploaded!");
       } else if (res.data?.post) {
-        toast.success("Post uploaded!"); // treat as real success
+        toast.success("Post uploaded!"); 
       } else {
         toast.error(res.data?.error || "Failed to upload post");
         return;

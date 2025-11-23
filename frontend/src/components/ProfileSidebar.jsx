@@ -17,12 +17,12 @@ const ProfileSidebar = () => {
       const token = localStorage.getItem("accessToken");
 
       const followerRes = await axios.get(
-        `http://localhost:3001/api/v1/user/get-follower/${user.id}`,
+        `${import.meta.env.VITE_API_URL}/api/v1/user/get-follower/${user.id}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
       const followingRes = await axios.get(
-        `http://localhost:3001/api/v1/user/get-following/${user.id}`,
+        `${import.meta.env.VITE_API_URL}/api/v1/user/get-following/${user.id}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
