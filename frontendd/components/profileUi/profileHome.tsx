@@ -55,7 +55,7 @@ export default function ProfileHome() {
                   </div>
 
                   <div className="text-center">
-                    <h2 className="text-sm text-gray-500">Following</h2>
+                    <h2 className="text-sm text-gray-500">Following</h2>ś
                     <h2 className="font-bold">{item.following}</h2>
                   </div>
                 </div>
