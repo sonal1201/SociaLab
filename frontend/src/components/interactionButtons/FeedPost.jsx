@@ -3,11 +3,11 @@ import LikeButton from "../ui/LikeButton";
 import CommentButton from "../ui/CommentButton";
 
 const FeedPost = ({ post }) => {
-  const profile = post.user.profile;
+  const profile = post?.user?.profile;
 
   return (
     <div className="border border-gray-200 rounded-xl p-4 shadow-sm">
-      {/* Header */}
+      {/* Header */}{" "}
       <div className="flex items-center gap-3 mb-3">
         <img
           src={profile?.profileImageUrl || "/default-avatar.png"}
@@ -20,15 +20,11 @@ const FeedPost = ({ post }) => {
           </span>
         </div>
       </div>
-
-      {/* Caption */}
       {post.caption && <p className="text-gray-700 mb-3">{post.caption}</p>}
-
       {/* Image */}
       {post.image && (
         <img src={post.image} className="w-full rounded-xl object-cover" />
       )}
-
       {/* Buttons */}
       <div className="flex items-center justify-start gap-5 mt-4 text-gray-600">
         <LikeButton postId={post.id} likedBy={post.likes} />

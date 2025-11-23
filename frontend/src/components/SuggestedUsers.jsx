@@ -14,7 +14,6 @@ const SuggestedUsers = () => {
 
   const shuffleArray = (array) => array.sort(() => Math.random() - 0.5);
 
-
   useEffect(() => {
     if (!user?.id) return;
 
@@ -99,7 +98,7 @@ const SuggestedUsers = () => {
 
       setSuggested((prev) => prev.filter((u) => u.id !== followId));
 
-      onFollowChange && onFollowChange(); 
+      onFollowChange && onFollowChange();
     } catch (error) {
       toast.error("Failed to follow");
     } finally {

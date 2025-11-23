@@ -110,9 +110,19 @@ export const updateProfile = async (req: AuthRequest, res: Response) => {
             }
         });
 
+        const updatedUser = await prisma.user.findUnique({
+            where: { id: userId },
+            include: {
+                profile: true,
+                posts: true,
+                followers: true,
+                following: true
+            }
+        });
+
         return res.status(200).json({
             message: "Profile updated successfully",
-            profile: updatedProfile
+            updatedUser
         });
 
     } catch (error) {

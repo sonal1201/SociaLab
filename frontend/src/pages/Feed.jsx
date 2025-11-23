@@ -1,93 +1,24 @@
-import { useLogout } from "@/components/Logout";
-import ProfileSidebar from "@/components/ProfileSidebar";
-import StatusSideBar from "@/components/StatusSideBar";
-import { getUserData } from "@/context/userContext";
-import { Menu } from "lucide-react";
 import React, { useState } from "react";
-
-import {
-  DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-} from "@/components/ui/dropdown-menu";
-
-import { useNavigate } from "react-router-dom";
-import { Highlighter } from "@/components/ui/highlighter";
-
-import FeedBar from "@/components/feedBar";
+import { getUserData } from "@/context/userContext";
+import FeedBar from "@/components/FeedBar";
 import FeedComponent from "@/components/FeedComponent";
 
 const Feed = () => {
-  const navigate = useNavigate();
   const { user } = getUserData();
-  const logoutHandler = useLogout();
-  const [refresh, setRefresh] = useState(false);
-
-  // 👇 refresh trigger
   const [refreshKey, setRefreshKey] = useState(0);
-  const refreshFeed = () => setRefreshKey((prev) => prev + 1);
 
   return (
-    <div className="max-w-7xl mx-auto w-full h-screen">
-      {/* MOBILE NAVBAR */}
-      <div
-        className="md:hidden w-full flex items-center justify-between px-4 py-3 
-        border-b border-gray-300 bg-white sticky top-0 z-50"
-      >
-        <h2 className="text-xl font-bold text-white">
-          <Highlighter action="highlight" color="#36572c" padding={15}>
-            Socialogy
-          </Highlighter>
-        </h2>
+    <div>
+      <h1 className="mb-4">
+        Welcome @
+        <span className="font-bold text-green-900">
+          {user?.profile?.username}
+        </span>
+      </h1>
 
-        <DropdownMenu>
-          <DropdownMenuTrigger className="p-2 rounded-md border border-gray-300">
-            <Menu size={24} className="text-black" />
-          </DropdownMenuTrigger>
+      <FeedBar refreshFeed={() => setRefreshKey((k) => k + 1)} />
 
-          <DropdownMenuContent className="w-40">
-            <DropdownMenuItem onClick={() => navigate("/profile")}>
-              Profile
-            </DropdownMenuItem>
-
-            <DropdownMenuSeparator />
-
-            <DropdownMenuItem onClick={logoutHandler}>Logout</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
-
-      <div className="grid grid-cols-12 w-full h-full">
-        {/* statusbar  */}
-        <div className="col-span-2 px-2 py-4 hidden border-l border-gray-300 md:block">
-          <StatusSideBar />
-        </div>
-
-        {/* //mainFeed  */}
-        <div className="col-span-12 md:col-span-7 border-x border-gray-300 p-4 scrollbar-hide overflow-y-auto">
-          <h1 className="mb-4">
-            Welcome @
-            <span className="font-bold text-green-900">
-              {user?.profile?.username}
-            </span>
-          </h1>
-
-          <FeedBar refreshFeed={() => setRefresh(!refresh)} />
-
-          {/* Feed scrolls */}
-          <div className="flex-1 overflow-y-auto">
-            <FeedComponent key={refreshKey} />
-          </div>
-        </div>
-
-        {/* //profileSideBar  */}
-        <div className="col-span-3 p-4 border-r border-gray-300 hidden md:block">
-
-          <ProfileSidebar />
-        </div>
-      </div>
+      <FeedComponent key={refreshKey} />
     </div>
   );
 };

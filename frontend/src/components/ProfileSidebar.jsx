@@ -2,14 +2,15 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { getUserData } from "@/context/userContext";
 import SuggestedUsers from "./SuggestedUsers";
-import { RefreshCw } from "lucide-react";
+
+import { useNavigate } from "react-router-dom";
 
 const ProfileSidebar = () => {
   const { user } = getUserData();
+  const navigate = useNavigate();
 
   const [followers, setFollowers] = useState(0);
   const [followings, setFollowings] = useState(0);
-  const [refreshing, setRefreshing] = useState(false);
 
   const fetchCounts = async () => {
     try {
@@ -41,7 +42,6 @@ const ProfileSidebar = () => {
     <>
       <div className="mt-5">
         <div className="flex flex-col lg:flex-row gap-4">
-          {/* Profile Image */}
           <div className="flex justify-center items-center w-full lg:w-30">
             <div className="rounded-full bg-gray-200 overflow-hidden">
               {user?.profile?.profileImageUrl ? (
@@ -60,7 +60,6 @@ const ProfileSidebar = () => {
             </div>
           </div>
 
-          {/* Username + counts */}
           <div className="text-center lg:text-left w-full">
             <div className="text-black text-lg font-semibold">
               @{user?.profile?.username}
@@ -80,16 +79,21 @@ const ProfileSidebar = () => {
           </div>
         </div>
 
-        {/* Bio */}
         <div className="text-sm mt-4 text-gray-700">
           <h2 className="text-gray-600">Bio:</h2>
           <h2 className="text-black">{user?.profile?.bio || "No bio added"}</h2>
         </div>
+
+        <button
+          onClick={() => navigate(`/profile/${user.id}`)}
+          className="mt-4 w-full bg-[#36572c] cursor-pointer text-white py-2 rounded-md hover:bg-[#294321] transition"
+        >
+          View Profile
+        </button>
       </div>
 
       <div className="w-full border-t border-gray-300 my-5"></div>
 
-      {/* Suggested Users */}
       <SuggestedUsers onFollowChange={fetchCounts} />
     </>
   );

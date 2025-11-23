@@ -1,57 +1,36 @@
 import React from "react";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import Feed from "./pages/Feed";
-import Register from "./pages/Register";
+
 import Login from "./pages/Login";
-import ProtectedRoute from "./components/ProtectedRoute";
-import OnBoarding from "./pages/OnBoarding";
+import Register from "./pages/Register";
+import Feed from "./pages/Feed";
 import Profile from "./pages/Profile";
+import OnBoarding from "./pages/OnBoarding";
+import ProtectedRoute from "./components/ProtectedRoute";
+import MainLayout from "./pages/MainLayout";
+
 
 const router = createBrowserRouter([
+  { path: "/", element: <Login /> },
+  { path: "/login", element: <Login /> },
+  { path: "/register", element: <Register /> },
+
   {
     path: "/",
-    element: <Login />,
-  },
-  {
-    path: "/feed",
     element: (
       <ProtectedRoute>
-        <Feed />
+        <MainLayout />
       </ProtectedRoute>
     ),
-  },
-  {
-    path: "/register",
-    element: <Register />,
-  },
-  {
-    path: "/onboarding",
-    element: (
-      <ProtectedRoute>
-        <OnBoarding />
-      </ProtectedRoute>
-    ),
-  },
-  {
-    path: "/profile",
-    element: (
-      <ProtectedRoute>
-        <Profile />
-      </ProtectedRoute>
-    ),
-  },
-  {
-    path: "/login",
-    element: <Login />,
+    children: [
+      { path: "feed", element: <Feed /> },
+      { path: "profile", element: <Profile /> },
+      { path: "profile/:userId", element: <Profile /> },
+      { path: "onboarding", element: <OnBoarding /> },
+    ],
   },
 ]);
 
-const App = () => {
-  return (
-    <div>
-      <RouterProvider router={router} />
-    </div>
-  );
-};
+const App = () => <RouterProvider router={router} />;
 
 export default App;

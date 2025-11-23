@@ -3,61 +3,71 @@ import { AuthRequest } from "../middleware/auth-middleware"
 import { prisma } from "../config/db";
 import { count, error } from "console";
 import uploadOnCloudinary from "../config/cloudinary";
-import { success } from "zod";
+
 
 
 export const getProfile = async (req: Request, res: Response) => {
-
     try {
-        const userId = req.params.userId
+        const userId = req.params.userId;
 
         const user = await prisma.user.findFirst({
-            where: {
-                id: userId
-            },
+            where: { id: userId },
             include: {
                 profile: true,
+
                 posts: {
                     include: {
-                        likes: true,
-                        comments: true
-                    }
+                        user: {
+                            include: { profile: true },
+                        },
+                        likes: {
+                            include: {
+                                user: {
+                                    include: { profile: true },
+                                },
+                            },
+                        },
+                        comments: {
+                            include: {
+                                user: {
+                                    include: { profile: true },
+                                },
+                            },
+                        },
+                    },
+                    orderBy: {
+                        createdAt: "desc",
+                    },
                 },
+
                 stories: true,
                 followers: true,
-                following: true
-
-            }
-        })
+                following: true,
+            },
+        });
 
         if (!user) {
-            return res.status(400).json({
-                message: "User not Found"
-            })
+            return res.status(400).json({ message: "User not Found" });
         }
 
-        return res.status(200).json({
-            user
-        })
+        return res.status(200).json({ user });
     } catch (error) {
-        console.log(error)
-        return res.status(400).json({
-            error: "getProfile Error"
-        })
+        console.log(error);
+        return res.status(400).json({ error: "getProfile Error" });
     }
-}
+};
 
 export const getAlluser = async (req: AuthRequest, res: Response) => {
     try {
         const currentUserId = req.userId;
 
-        // Get all users except me
+
         let users = await prisma.user.findMany({
             where: { id: { not: currentUserId } },
             include: { profile: true },
         });
 
-        // Get all I already follow
+
         const alreadyFollowing = await prisma.follow.findMany({
             where: { followerId: currentUserId },
             select: { followingId: true },
@@ -65,7 +75,7 @@ export const getAlluser = async (req: AuthRequest, res: Response) => {
 
         const followingIds = alreadyFollowing.map((f) => f.followingId);
 
-        // Filter out users I already follow
+
         const filteredUsers = users.filter(
             (u) => !followingIds.includes(u.id)
         );
@@ -250,18 +260,11 @@ export const getAllFollowing = async (req: AuthRequest, res: Response) => {
 
 export const createPost = async (req: AuthRequest, res: Response) => {
     try {
-        const { caption, image } = req.body;
-
-        console.log("req.userId from middleware:", req.userId);
-        console.log("Creating post with caption:", caption);
-
-
-        const userId = req.userId
+        const { caption } = req.body;
+        const userId = req.userId;
 
         if (!userId) {
-            return res.status(401).json({
-                error: "Unauthorized User"
-            })
+            return res.status(401).json({ error: "Unauthorized User" });
         }
 
         if (!caption && !req.file) {
@@ -269,7 +272,7 @@ export const createPost = async (req: AuthRequest, res: Response) => {
                 error: "Post must include a caption or an image",
             });
         }
-        
+
         let imageUrl = null;
         if (req.file) {
             imageUrl = await uploadOnCloudinary(req.file.path);
@@ -279,44 +282,33 @@ export const createPost = async (req: AuthRequest, res: Response) => {
             data: {
                 caption,
                 image: imageUrl,
-                userId
+                userId,
             },
             include: {
-                user: {
-                    include: {
-                        profile: true
-                    }
-                },
+                user: { include: { profile: true } },
                 likes: {
                     include: {
-                        user: {
-                            include: {
-                                profile: true
-                            }
-                        }
-                    }
+                        user: { include: { profile: true } },
+                    },
                 },
                 comments: {
                     include: {
-                        user: {
-                            include: {
-                                profile: true
-                            }
-                        }
-                    }
-                }
-            }
+                        user: { include: { profile: true } },
+                    },
+                },
+            },
         });
 
         return res.status(201).json({
             success: true,
-            post: created
+            post: created,
         });
     } catch (error) {
         console.log(error);
         return res.status(500).json({ error: "createPost Error" });
     }
-}
+};
+
 
 export const deletePost = async (req: AuthRequest, res: Response) => {
     try {
