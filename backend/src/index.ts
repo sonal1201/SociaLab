@@ -12,7 +12,7 @@ const PORT = process.env.PORT || 3002
 
 app.use(express.json());
 app.use(cors({
-    origin: ['http://localhost:5173','https://socialogy.vercel.app/'],
+    origin: ['http://localhost:5173', 'https://socialogy.vercel.app/'],
     credentials: true
 }))
 
